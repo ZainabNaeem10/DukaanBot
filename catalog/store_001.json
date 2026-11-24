@@ -1,0 +1,364 @@
+{
+  "store": {
+    "store_id": "store_001",
+    "name": "Noor Collection",
+    "city": "Lahore",
+    "delivery_charge": 250,
+    "delivery_policy": "Delivery takes 3-5 working days to major cities and 5-7 working days elsewhere in Pakistan. Flat delivery charge Rs. 250; delivery is free on orders above Rs. 8,000.",
+    "return_policy": "Exchange within 7 days for a wrong size or a defect. Items must be unworn with tags attached. No refunds on sale items.",
+    "payment_options": [
+      "Cash on delivery",
+      "Bank transfer",
+      "Easypaisa",
+      "JazzCash"
+    ]
+  },
+  "products": [
+    {
+      "sku": "LWN-001",
+      "name": "Embroidered Lawn 3-Piece",
+      "category": "lawn suit",
+      "fabric": "lawn",
+      "colors": [
+        "Red",
+        "Sea Green"
+      ],
+      "sizes": [
+        "S",
+        "M",
+        "L"
+      ],
+      "price": 5800,
+      "stock": {
+        "S": 5,
+        "M": 3,
+        "L": 0
+      },
+      "description": "Stitched 3-piece with embroidered shirt, printed dupatta and plain trouser."
+    },
+    {
+      "sku": "LWN-002",
+      "name": "Printed Lawn 2-Piece",
+      "category": "lawn suit",
+      "fabric": "lawn",
+      "colors": [
+        "Blue",
+        "Yellow"
+      ],
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "price": 3200,
+      "stock": {
+        "S": 8,
+        "M": 10,
+        "L": 6,
+        "XL": 2
+      },
+      "description": "Stitched 2-piece with printed shirt and plain trouser."
+    },
+    {
+      "sku": "LWN-003",
+      "name": "Unstitched Lawn 3-Piece",
+      "category": "lawn suit",
+      "fabric": "lawn",
+      "colors": [
+        "Maroon",
+        "Teal"
+      ],
+      "sizes": [
+        "Unstitched"
+      ],
+      "price": 4500,
+      "stock": {
+        "Unstitched": 25
+      },
+      "description": "Unstitched fabric: 3 m shirt, 2.5 m trouser, 2.5 m dupatta."
+    },
+    {
+      "sku": "CTN-001",
+      "name": "Cotton Kurta",
+      "category": "kurta",
+      "fabric": "cotton",
+      "colors": [
+        "White",
+        "Black",
+        "Mustard"
+      ],
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "price": 2400,
+      "stock": {
+        "S": 12,
+        "M": 15,
+        "L": 9,
+        "XL": 4
+      },
+      "description": "Straight-cut everyday cotton kurta."
+    },
+    {
+      "sku": "CTN-002",
+      "name": "Plain Cotton Trouser",
+      "category": "trouser",
+      "fabric": "cotton",
+      "colors": [
+        "Black",
+        "Beige"
+      ],
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "price": 1200,
+      "stock": {
+        "S": 20,
+        "M": 18,
+        "L": 14,
+        "XL": 7
+      },
+      "description": "Straight-fit cotton trouser."
+    },
+    {
+      "sku": "KHD-001",
+      "name": "Khaddar Winter Suit 3-Piece",
+      "category": "winter suit",
+      "fabric": "khaddar",
+      "colors": [
+        "Brown",
+        "Grey"
+      ],
+      "sizes": [
+        "M",
+        "L",
+        "XL"
+      ],
+      "price": 6500,
+      "stock": {
+        "M": 4,
+        "L": 6,
+        "XL": 0
+      },
+      "description": "Warm stitched 3-piece with khaddar shirt and trouser and a matching shawl."
+    },
+    {
+      "sku": "KRN-001",
+      "name": "Karandi Shawl",
+      "category": "shawl",
+      "fabric": "karandi",
+      "colors": [
+        "Camel",
+        "Black"
+      ],
+      "sizes": [
+        "Free size"
+      ],
+      "price": 3800,
+      "stock": {
+        "Free size": 10
+      },
+      "description": "Soft karandi shawl, one size."
+    },
+    {
+      "sku": "CHF-001",
+      "name": "Chiffon Party Dupatta",
+      "category": "dupatta",
+      "fabric": "chiffon",
+      "colors": [
+        "Pink",
+        "Peach",
+        "Emerald"
+      ],
+      "sizes": [
+        "Free size"
+      ],
+      "price": 1800,
+      "stock": {
+        "Free size": 15
+      },
+      "description": "Lightweight chiffon dupatta with lace border."
+    },
+    {
+      "sku": "CHF-002",
+      "name": "Embroidered Chiffon 3-Piece",
+      "category": "party wear",
+      "fabric": "chiffon",
+      "colors": [
+        "Peach",
+        "Navy"
+      ],
+      "sizes": [
+        "S",
+        "M",
+        "L"
+      ],
+      "price": 9800,
+      "stock": {
+        "S": 3,
+        "M": 4,
+        "L": 2
+      },
+      "description": "Stitched party-wear 3-piece with heavy embroidery."
+    },
+    {
+      "sku": "ABY-001",
+      "name": "Plain Abaya",
+      "category": "abaya",
+      "fabric": "nida",
+      "colors": [
+        "Black",
+        "Navy"
+      ],
+      "sizes": [
+        "52",
+        "54",
+        "56"
+      ],
+      "price": 4200,
+      "stock": {
+        "52": 6,
+        "54": 8,
+        "56": 5
+      },
+      "description": "Front-open plain abaya. Sizes are lengths in inches."
+    },
+    {
+      "sku": "ABY-002",
+      "name": "Embroidered Abaya",
+      "category": "abaya",
+      "fabric": "nida",
+      "colors": [
+        "Black"
+      ],
+      "sizes": [
+        "52",
+        "54",
+        "56"
+      ],
+      "price": 5600,
+      "stock": {
+        "52": 3,
+        "54": 0,
+        "56": 2
+      },
+      "description": "Abaya with embroidered sleeves. Sizes are lengths in inches."
+    },
+    {
+      "sku": "LIN-001",
+      "name": "Linen Kurta",
+      "category": "kurta",
+      "fabric": "linen",
+      "colors": [
+        "Olive",
+        "Sand"
+      ],
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "price": 3600,
+      "stock": {
+        "S": 5,
+        "M": 7,
+        "L": 7,
+        "XL": 3
+      },
+      "description": "Relaxed linen kurta."
+    },
+    {
+      "sku": "CMB-001",
+      "name": "Cambric Kurta",
+      "category": "kurta",
+      "fabric": "cambric",
+      "colors": [
+        "Grey",
+        "Maroon"
+      ],
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "price": 2900,
+      "stock": {
+        "S": 6,
+        "M": 9,
+        "L": 8,
+        "XL": 0
+      },
+      "description": "Soft cambric kurta for cooler weather."
+    },
+    {
+      "sku": "SLK-001",
+      "name": "Raw Silk Kurta",
+      "category": "kurta",
+      "fabric": "raw silk",
+      "colors": [
+        "Black",
+        "Gold"
+      ],
+      "sizes": [
+        "M",
+        "L"
+      ],
+      "price": 7200,
+      "stock": {
+        "M": 4,
+        "L": 3
+      },
+      "description": "Raw silk kurta for formal occasions."
+    },
+    {
+      "sku": "TRS-001",
+      "name": "Cigarette Pant",
+      "category": "trouser",
+      "fabric": "cotton blend",
+      "colors": [
+        "Black",
+        "Navy",
+        "White"
+      ],
+      "sizes": [
+        "S",
+        "M",
+        "L"
+      ],
+      "price": 1500,
+      "stock": {
+        "S": 10,
+        "M": 12,
+        "L": 8
+      },
+      "description": "Slim ankle-length pant."
+    },
+    {
+      "sku": "SHL-001",
+      "name": "Wool Shawl",
+      "category": "shawl",
+      "fabric": "wool",
+      "colors": [
+        "Grey",
+        "Maroon"
+      ],
+      "sizes": [
+        "Free size"
+      ],
+      "price": 3200,
+      "stock": {
+        "Free size": 12
+      },
+      "description": "Warm wool shawl, one size."
+    }
+  ]
+}

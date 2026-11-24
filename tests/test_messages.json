@@ -1,0 +1,344 @@
+[
+  {
+    "id": 1,
+    "message": "ye red lawn suit M size mein hai?",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "LWN-001 red, size M in stock (3 left), Rs. 5,800"
+  },
+  {
+    "id": 2,
+    "message": "red wala lawn suit large mein milega?",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "LWN-001 size L is out of stock; must say so, not invent stock"
+  },
+  {
+    "id": 3,
+    "message": "Printed lawn ka price kya hai?",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "LWN-002, Rs. 3,200",
+    "must_include_any": [
+      "3200",
+      "3,200"
+    ]
+  },
+  {
+    "id": 4,
+    "message": "delivery Karachi kitne din mein hogi?",
+    "expected_intent": "policy",
+    "expected_escalate": false,
+    "facts": "3-5 working days to major cities; Rs. 250 delivery charge"
+  },
+  {
+    "id": 5,
+    "message": "COD ho jayega?",
+    "expected_intent": "policy",
+    "expected_escalate": false,
+    "facts": "Cash on delivery is available"
+  },
+  {
+    "id": 6,
+    "message": "khaddar suit XL available hai?",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "KHD-001 size XL is out of stock"
+  },
+  {
+    "id": 7,
+    "message": "abaya 54 size black embroidered hai?",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "ABY-002 size 54 is out of stock"
+  },
+  {
+    "id": 8,
+    "message": "do you have a green leather jacket?",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "Not in catalog; say it is not available, do not invent a product"
+  },
+  {
+    "id": 9,
+    "message": "mujhe 2 cotton kurta M white chahiye, Islamabad bhej dein",
+    "expected_intent": "order",
+    "expected_escalate": false,
+    "facts": "CTN-001 x2, size M, white; ask for name, address and phone before creating the order"
+  },
+  {
+    "id": 10,
+    "message": "mujhe refund chahiye, suit kharab nikla",
+    "expected_intent": "complaint",
+    "expected_escalate": true,
+    "facts": "Refund or defect complaint goes to the seller"
+  },
+  {
+    "id": 11,
+    "message": "thora discount mil sakta hai?",
+    "expected_intent": "discount",
+    "expected_escalate": true,
+    "facts": "Discount negotiation goes to the seller"
+  },
+  {
+    "id": 12,
+    "message": "mujhe 50 suits ka bulk order karna hai",
+    "expected_intent": "bulk",
+    "expected_escalate": true,
+    "facts": "Bulk order goes to the seller"
+  },
+  {
+    "id": 13,
+    "message": "salam, lawn ka koi unstitched suit hai?",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "LWN-003 unstitched lawn 3-piece, Rs. 4,500",
+    "must_include_any": [
+      "4500",
+      "4,500"
+    ]
+  },
+  {
+    "id": 14,
+    "message": "cotton kurta kis kis colour mein hai?",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "CTN-001 colors: White, Black, Mustard",
+    "must_include_any": [
+      "white",
+      "black",
+      "mustard"
+    ]
+  },
+  {
+    "id": 15,
+    "message": "Raw silk kurta S size mein hai?",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "SLK-001 is only made in M and L; S is not offered"
+  },
+  {
+    "id": 16,
+    "message": "wool shawl ka price?",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "SHL-001, Rs. 3,200",
+    "must_include_any": [
+      "3200",
+      "3,200"
+    ]
+  },
+  {
+    "id": 17,
+    "message": "karandi shawl kitne ki hai",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "KRN-001, Rs. 3,800 (spelling variant of kitnay ka)",
+    "must_include_any": [
+      "3800",
+      "3,800"
+    ]
+  },
+  {
+    "id": 18,
+    "message": "kitne ka hai chiffon dupatta pink",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "CHF-001, Rs. 1,800",
+    "must_include_any": [
+      "1800",
+      "1,800"
+    ]
+  },
+  {
+    "id": 19,
+    "message": "free delivery kab hoti hai?",
+    "expected_intent": "policy",
+    "expected_escalate": false,
+    "facts": "Free on orders above Rs. 8,000",
+    "must_include_any": [
+      "8000",
+      "8,000"
+    ]
+  },
+  {
+    "id": 20,
+    "message": "exchange ho sakta hai agar size choti ho?",
+    "expected_intent": "policy",
+    "expected_escalate": false,
+    "facts": "Exchange within 7 days for wrong size; unworn with tags attached"
+  },
+  {
+    "id": 21,
+    "message": "mera order abhi tak nahi aaya, 10 din ho gaye",
+    "expected_intent": "complaint",
+    "expected_escalate": true,
+    "facts": "Late order complaint; no tracking data in the catalog, so hand over to the seller"
+  },
+  {
+    "id": 22,
+    "message": "kya aap Easypaisa se payment le lete hain?",
+    "expected_intent": "policy",
+    "expected_escalate": false,
+    "facts": "Yes: Easypaisa is a payment option (also COD, bank transfer, JazzCash)"
+  },
+  {
+    "id": 23,
+    "message": "plain abaya 52 size navy mein hai?",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "ABY-001 size 52 in stock (6 left), Navy available"
+  },
+  {
+    "id": 24,
+    "message": "embroidered abaya navy mein milegi?",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "ABY-002 is only available in Black"
+  },
+  {
+    "id": 25,
+    "message": "cambric kurta XL mein hai?",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "CMB-001 size XL is out of stock"
+  },
+  {
+    "id": 26,
+    "message": "chiffon party wear peach M mein hai? price?",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "CHF-002 peach, size M in stock (4 left), Rs. 9,800",
+    "must_include_any": [
+      "9800",
+      "9,800"
+    ]
+  },
+  {
+    "id": 27,
+    "message": "9800 wale suit pe delivery charges lagenge?",
+    "expected_intent": "policy",
+    "expected_escalate": false,
+    "facts": "No: delivery is free above Rs. 8,000"
+  },
+  {
+    "id": 28,
+    "message": "ایمبرائیڈرڈ لان سوٹ کی قیمت کیا ہے؟",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "Urdu script. LWN-001, Rs. 5,800"
+  },
+  {
+    "id": 29,
+    "message": "یہ کرتا لارج میں ہے؟",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "Urdu script, ambiguous: there are several kurtas, so ask which one rather than guess"
+  },
+  {
+    "id": 30,
+    "message": "linen kurta olive L mein hai? price btao",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "LIN-001 olive, size L in stock (7 left), Rs. 3,600",
+    "must_include_any": [
+      "3600",
+      "3,600"
+    ]
+  },
+  {
+    "id": 31,
+    "message": "kia aap ki Lahore mein shop bhi hai? address do",
+    "expected_intent": "other",
+    "expected_escalate": true,
+    "facts": "Catalog only says the store is based in Lahore; no shop address. Must not invent one; handing over is acceptable"
+  },
+  {
+    "id": 32,
+    "message": "bohat mehnga hai, 4500 mein de do",
+    "expected_intent": "discount",
+    "expected_escalate": true,
+    "facts": "Price negotiation goes to the seller"
+  },
+  {
+    "id": 33,
+    "message": "tum log fraud ho, paise le kar suit nahi bheja",
+    "expected_intent": "complaint",
+    "expected_escalate": true,
+    "facts": "Angry complaint goes to the seller"
+  },
+  {
+    "id": 34,
+    "message": "I need a size M white cotton kurta and a black trouser size M",
+    "expected_intent": "order",
+    "expected_escalate": false,
+    "facts": "CTN-001 M white + CTN-002 M black; ask for name, address and phone"
+  },
+  {
+    "id": 35,
+    "message": "Ali Raza, House 5 Street 3 F-8 Islamabad, 03001234567",
+    "expected_intent": "order",
+    "expected_escalate": false,
+    "facts": "Order is now complete: CTN-001, size M, White, qty 1, with name, address, phone",
+    "history": [
+      {
+        "role": "customer",
+        "text": "cotton kurta M white chahiye 1"
+      },
+      {
+        "role": "bot",
+        "text": "Ji, Cotton Kurta M White available hai (Rs. 2,400). Order ke liye apna naam, address aur phone number bata dein."
+      }
+    ],
+    "expected_order": true
+  },
+  {
+    "id": 36,
+    "message": "Embroidered wala",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "Follows the earlier question: LWN-001, Rs. 5,800",
+    "must_include_any": [
+      "5800",
+      "5,800"
+    ],
+    "history": [
+      {
+        "role": "customer",
+        "text": "lawn suit ka price kya hai?"
+      },
+      {
+        "role": "bot",
+        "text": "Humare paas Embroidered aur Printed lawn suits hain. Kaun sa chahiye?"
+      }
+    ]
+  },
+  {
+    "id": 37,
+    "message": "Assalam o alaikum",
+    "expected_intent": "other",
+    "expected_escalate": false,
+    "facts": "Greeting: reply politely and offer help; do not escalate"
+  },
+  {
+    "id": 38,
+    "message": "shukriya",
+    "expected_intent": "other",
+    "expected_escalate": false,
+    "facts": "Thanks: short polite reply; do not escalate"
+  },
+  {
+    "id": 39,
+    "message": "Sea Green lawn suit S size mein hai?",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "LWN-001 Sea Green, size S in stock (5 left)"
+  },
+  {
+    "id": 40,
+    "message": "tracksuit hai?",
+    "expected_intent": "product_question",
+    "expected_escalate": false,
+    "facts": "Not in catalog; say it is not available, do not invent a product"
+  }
+]

@@ -1,0 +1,297 @@
+[
+ {
+  "id": 1,
+  "message": "Edinaa M size mein available hai?",
+  "expected_intent": "product_question",
+  "expected_escalate": false,
+  "facts": "BTK-001 size M in stock, Rs. 11,193 (sale, regular 15,990)",
+  "source": "written",
+  "must_include_any": [
+   "11,193",
+   "11193"
+  ]
+ },
+ {
+  "id": 2,
+  "message": "Amiraa ka price kya hai?",
+  "expected_intent": "product_question",
+  "expected_escalate": false,
+  "facts": "BTK-002 Rs. 13,293 sale price",
+  "source": "written",
+  "must_include_any": [
+   "13,293",
+   "13293"
+  ]
+ },
+ {
+  "id": 3,
+  "message": "Aquamarine 2 piece XL mein hai?",
+  "expected_intent": "product_question",
+  "expected_escalate": false,
+  "facts": "BTK-008 size XL in stock, Rs. 4,193",
+  "source": "written",
+  "must_include_any": [
+   "4,193",
+   "4193"
+  ]
+ },
+ {
+  "id": 4,
+  "message": "is the Kara 2 piece available in small?",
+  "expected_intent": "product_question",
+  "expected_escalate": false,
+  "facts": "BTK-009 size S in stock, Rs. 4,193",
+  "source": "written"
+ },
+ {
+  "id": 5,
+  "message": "Edinaa red colour mein milega?",
+  "expected_intent": "product_question",
+  "expected_escalate": false,
+  "facts": "BTK-001 comes only in Blue; must not say red exists",
+  "source": "written",
+  "must_include_any": [
+   "blue"
+  ]
+ },
+ {
+  "id": 6,
+  "message": "Amiraa XXL size hai?",
+  "expected_intent": "product_question",
+  "expected_escalate": false,
+  "facts": "BTK-002 sizes XS-XL only; no XXL",
+  "source": "written"
+ },
+ {
+  "id": 7,
+  "message": "Kara ka fabric kya hai?",
+  "expected_intent": "product_question",
+  "expected_escalate": false,
+  "facts": "BTK-009 lawn shirt, printed cambric culottes",
+  "source": "written",
+  "must_include_any": [
+   "lawn",
+   "cambric"
+  ]
+ },
+ {
+  "id": 8,
+  "message": "Lilac Dream milega?",
+  "expected_intent": "product_question",
+  "expected_escalate": false,
+  "facts": "BTK-029 sold out; must say sold out, no order",
+  "source": "written",
+  "must_include_any": [
+   "sold out"
+  ]
+ },
+ {
+  "id": 9,
+  "message": "Myra lawn dress chahiye M size",
+  "expected_intent": "product_question",
+  "expected_escalate": false,
+  "facts": "BTK-030 sold out",
+  "source": "written",
+  "must_include_any": [
+   "sold out"
+  ]
+ },
+ {
+  "id": 10,
+  "message": "Sorbet farshi shalwar hai?",
+  "expected_intent": "product_question",
+  "expected_escalate": false,
+  "facts": "BTK-035 sold out",
+  "source": "written",
+  "must_include_any": [
+   "sold out"
+  ]
+ },
+ {
+  "id": 11,
+  "message": "Mavi M size mein available hai?",
+  "expected_intent": "product_question",
+  "expected_escalate": true,
+  "facts": "BTK-003 sizes not listed: give price Rs. 11,893, seller confirms size",
+  "source": "written",
+  "must_include_any": [
+   "11,893",
+   "11893"
+  ]
+ },
+ {
+  "id": 12,
+  "message": "Smoke 3 piece black colour mein hai?",
+  "expected_intent": "product_question",
+  "expected_escalate": true,
+  "facts": "BTK-021 colors not listed: seller confirms",
+  "source": "written"
+ },
+ {
+  "id": 13,
+  "message": "Halo luxe pret ki price?",
+  "expected_intent": "product_question",
+  "expected_escalate": false,
+  "facts": "BTK-025 Rs. 11,893",
+  "source": "written",
+  "must_include_any": [
+   "11,893",
+   "11893"
+  ]
+ },
+ {
+  "id": 14,
+  "message": "Joy festive eid print kitne ka hai",
+  "expected_intent": "product_question",
+  "expected_escalate": false,
+  "facts": "BTK-018 Rs. 9,443",
+  "source": "written",
+  "must_include_any": [
+   "9,443",
+   "9443"
+  ]
+ },
+ {
+  "id": 15,
+  "message": "do you have men's kurta?",
+  "expected_intent": "product_question",
+  "expected_escalate": false,
+  "facts": "No men's items in catalog; say not available",
+  "source": "written"
+ },
+ {
+  "id": 16,
+  "message": "delivery kitne din mein hogi?",
+  "expected_intent": "policy",
+  "expected_escalate": false,
+  "facts": "7-10 working days, new collections 8-12",
+  "source": "written",
+  "must_include_any": [
+   "7-10",
+   "7 to 10"
+  ]
+ },
+ {
+  "id": 17,
+  "message": "delivery charges kitne hain?",
+  "expected_intent": "policy",
+  "expected_escalate": false,
+  "facts": "Free shipping across Pakistan",
+  "source": "written",
+  "must_include_any": [
+   "free"
+  ]
+ },
+ {
+  "id": 18,
+  "message": "COD ho jayega?",
+  "expected_intent": "policy",
+  "expected_escalate": false,
+  "facts": "Cash on delivery, no advance payment",
+  "source": "written"
+ },
+ {
+  "id": 19,
+  "message": "card se payment ho sakti hai?",
+  "expected_intent": "policy",
+  "expected_escalate": false,
+  "facts": "Visa or MasterCard online",
+  "source": "written",
+  "must_include_any": [
+   "visa",
+   "mastercard",
+   "card"
+  ]
+ },
+ {
+  "id": 20,
+  "message": "sale wala suit exchange ho sakta hai?",
+  "expected_intent": "policy",
+  "expected_escalate": false,
+  "facts": "Sale items cannot be exchanged or refunded",
+  "source": "written"
+ },
+ {
+  "id": 21,
+  "message": "size chota nikla to exchange hoga?",
+  "expected_intent": "policy",
+  "expected_escalate": false,
+  "facts": "Exchange only for damaged/defective/not matching specs within 7 days; sale items no exchange. Answer must not promise size exchange",
+  "source": "written"
+ },
+ {
+  "id": 22,
+  "message": "mujhe refund chahiye, suit phata hua aaya",
+  "expected_intent": "complaint",
+  "expected_escalate": true,
+  "facts": "Escalate (refund/defect)",
+  "source": "written"
+ },
+ {
+  "id": 23,
+  "message": "order 12 din se nahi aaya",
+  "expected_intent": "complaint",
+  "expected_escalate": true,
+  "facts": "Escalate (late delivery)",
+  "source": "written"
+ },
+ {
+  "id": 24,
+  "message": "thora discount de dein",
+  "expected_intent": "discount",
+  "expected_escalate": true,
+  "facts": "Escalate (discount)",
+  "source": "written"
+ },
+ {
+  "id": 25,
+  "message": "20 suits ka bulk order chahiye",
+  "expected_intent": "bulk",
+  "expected_escalate": true,
+  "facts": "Escalate (bulk)",
+  "source": "written"
+ },
+ {
+  "id": 26,
+  "message": "Edinaa 2 chahiye M size",
+  "expected_intent": "order",
+  "expected_escalate": false,
+  "facts": "BTK-001 M qty 2; ask for name, address, phone; qty 2 must be accepted",
+  "source": "written"
+ },
+ {
+  "id": 27,
+  "message": "ایڈینا کی قیمت کیا ہے؟",
+  "expected_intent": "product_question",
+  "expected_escalate": false,
+  "facts": "Urdu script; BTK-001 Rs. 11,193 (may fail: name in Urdu script)",
+  "source": "written"
+ },
+ {
+  "id": 28,
+  "message": "Assalam o alaikum",
+  "expected_intent": "other",
+  "expected_escalate": false,
+  "facts": "Greeting",
+  "source": "written"
+ },
+ {
+  "id": 29,
+  "message": "Sara Khan, House 5 Street 3 F-7 Islamabad, 03001234567",
+  "expected_intent": "order",
+  "expected_escalate": false,
+  "facts": "Order complete: BTK-008 size M qty 1 with name, address, phone",
+  "source": "written",
+  "history": [
+   {
+    "role": "customer",
+    "text": "Aquamarine M size 1 chahiye"
+   },
+   {
+    "role": "bot",
+    "text": "Ji, Aquamarine 2Pc - Printed Lawn Dress M size mein available hai (Rs. 4,193). Order ke liye apna naam, address aur phone number bata dein."
+   }
+  ],
+  "expected_order": true
+ }
+]

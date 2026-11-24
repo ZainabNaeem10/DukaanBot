@@ -1,0 +1,43 @@
+services:
+  mongo:
+    image: mongo:4.4   # 4.4 runs on CPUs without AVX; MongoDB 5+ does not
+    volumes:
+      - mongo_data:/data/db
+
+  ai-service:
+    build: ./ai-service
+    ports:
+      - "8000:8000"
+    environment:
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_PROVIDER: ${LLM_PROVIDER:-groq}
+      LLM_MODEL: ${LLM_MODEL:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      EMBED_MODEL: ${EMBED_MODEL:-}
+      CATALOG_DIR: /catalog
+    volumes:
+      - ./catalog:/catalog:ro
+
+  backend:
+    build: ./backend
+    restart: on-failure   # retries if MongoDB is not ready yet
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      MONGO_URL: mongodb://mongo:27017/dukaanbot
+      AI_SERVICE_URL: http://ai-service:8000
+      CATALOG_DIR: /catalog
+      WHATSAPP_VERIFY_TOKEN: ${WHATSAPP_VERIFY_TOKEN:-}
+      WHATSAPP_TOKEN: ${WHATSAPP_TOKEN:-}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
+      WHATSAPP_API_VERSION: ${WHATSAPP_API_VERSION:-v21.0}
+      WHATSAPP_STORE_ID: ${WHATSAPP_STORE_ID:-store_002}
+    volumes:
+      - ./catalog:/catalog:ro
+    depends_on:
+      - mongo
+      - ai-service
+
+volumes:
+  mongo_data:

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seller view (demo)</title>
+<style>
+  :root { --ink: #17302d; --field: #e8edea; --surface: #fff; --line: #cfd9d5; --muted: #5b6f6a; --flag: #9a4b07; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--field); color: var(--ink); font: 16px/1.5 system-ui, "Segoe UI", "Noto Sans Arabic", Roboto, sans-serif; }
+  main { max-width: 960px; margin: 0 auto; padding: 20px 16px 48px; }
+  h1 { font-size: 1.3rem; margin: 0 0 4px; }
+  h2 { font-size: 1.05rem; margin: 28px 0 8px; }
+  p.sub { margin: 0; color: var(--muted); }
+  .bar { display: flex; gap: 8px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+  button { font: inherit; cursor: pointer; background: var(--ink); color: #fff; border: 0; border-radius: 6px; padding: 7px 14px; }
+  button.ghost { background: none; color: var(--ink); border: 1px solid var(--line); }
+  #status { color: var(--muted); font-size: 0.9rem; }
+  .scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.93rem; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 650; background: #f3f6f5; }
+  tr:last-child td { border-bottom: 0; }
+  .empty { padding: 14px 12px; color: var(--muted); }
+  .reason { color: var(--flag); font-weight: 600; }
+  :focus-visible { outline: 3px solid #2f7f74; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Seller view</h1>
+  <p class="sub">Orders and chats the bot handed over. Shows both stores: BATIK (store_002, real catalog) and Noor Collection (store_001, fictional).</p>
+  <div class="bar">
+    <button id="refresh" type="button">Refresh</button>
+    <button id="reload" class="ghost" type="button">Reload catalog</button>
+    <span id="status" role="status"></span>
+  </div>
+
+  <h2>Orders</h2>
+  <div class="scroll"><table id="orders"></table></div>
+
+  <h2>Chats for the seller to answer</h2>
+  <div class="scroll"><table id="chats"></table></div>
+</main>
+
+<script>
+  const statusEl = document.getElementById('status');
+
+  function cell(tr, text) {
+    const td = document.createElement('td');
+    td.textContent = text == null ? '' : text;
+    td.dir = 'auto';
+    tr.appendChild(td);
+  }
+
+  function fill(table, headers, rows, emptyText) {
+    table.innerHTML = '';
+    if (!rows.length) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.className = 'empty';
+      td.textContent = emptyText;
+      tr.appendChild(td);
+      table.appendChild(tr);
+      return;
+    }
+    const head = document.createElement('tr');
+    headers.forEach((h) => { const th = document.createElement('th'); th.textContent = h; head.appendChild(th); });
+    table.appendChild(head);
+    rows.forEach((r) => {
+      const tr = document.createElement('tr');
+      r.forEach((v) => cell(tr, v));
+      table.appendChild(tr);
+    });
+  }
+
+  const when = (d) => new Date(d).toLocaleString();
+
+  async function load() {
+    statusEl.textContent = 'Loading...';
+    try {
+      const [orders, chats] = await Promise.all([
+        fetch('/api/orders').then((r) => r.json()),
+        fetch('/api/conversations?escalated=true').then((r) => r.json()),
+      ]);
+      fill(document.getElementById('orders'),
+        ['Time', 'Items', 'Customer', 'Total (Rs.)'],
+        orders.map((o) => [
+          when(o.createdAt),
+          o.items.map((i) => i.qty + ' x ' + i.name + (i.size ? ' (' + i.size + ')' : '')).join(', '),
+          [o.customer.name, o.customer.address, o.customer.phone].filter(Boolean).join(' | '),
+          ((o.items_total || 0) + (o.delivery_charge || 0)).toLocaleString(),
+        ]),
+        'No orders yet. Place one from the chat page.');
+      fill(document.getElementById('chats'),
+        ['Updated', 'Reason', 'Last customer message'],
+        chats.map((c) => {
+          const lastCustomer = [...c.messages].reverse().find((m) => m.role === 'customer');
+          return [when(c.updatedAt), c.escalate_reason, lastCustomer ? lastCustomer.text : ''];
+        }),
+        'No chats waiting for the seller.');
+      statusEl.textContent = 'Updated ' + new Date().toLocaleTimeString();
+    } catch (err) {
+      statusEl.textContent = 'Could not load data. Check that the backend is running.';
+    }
+  }
+
+  document.getElementById('refresh').addEventListener('click', load);
+  document.getElementById('reload').addEventListener('click', async () => {
+    statusEl.textContent = 'Reloading catalog...';
+    try {
+      const res = await fetch('/api/catalog/reload', { method: 'POST' });
+      const data = await res.json();
+      const n = (data.loaded || []).reduce((s, x) => s + x.products, 0);
+      statusEl.textContent = 'Catalog reloaded: ' + n + ' products.';
+    } catch (err) {
+      statusEl.textContent = 'Catalog reload failed.';
+    }
+  });
+  load();
+</script>
+</body>
+</html>

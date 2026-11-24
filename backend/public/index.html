@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Noor Collection chat (demo)</title>
+<style>
+  :root {
+    --ink: #17302d;
+    --field: #e8edea;
+    --surface: #ffffff;
+    --line: #cfd9d5;
+    --muted: #5b6f6a;
+    --flag: #9a4b07;
+    --flag-bg: #fdf1e3;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--field);
+    color: var(--ink);
+    font: 16px/1.5 system-ui, "Segoe UI", "Noto Sans Arabic", Roboto, sans-serif;
+    display: flex;
+    justify-content: center;
+  }
+  .app {
+    width: 100%;
+    max-width: 640px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-left: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+  }
+  header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  header h1 { margin: 0; font-size: 1.1rem; font-weight: 650; }
+  header p { margin: 0; font-size: 0.85rem; color: var(--muted); }
+  button {
+    font: inherit;
+    cursor: pointer;
+  }
+  .controls { display: flex; gap: 8px; align-items: center; }
+  select {
+    font: inherit;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 5px 8px;
+    background: none;
+    color: var(--ink);
+  }
+  .ghost {
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 6px 12px;
+    color: var(--ink);
+  }
+  #log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--field);
+  }
+  .msg {
+    max-width: 82%;
+    padding: 9px 13px;
+    border-radius: 14px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .msg.customer { align-self: flex-end; background: var(--ink); color: #fff; border-bottom-right-radius: 4px; }
+  .msg.bot { align-self: flex-start; background: var(--surface); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+  .msg.pending { color: var(--muted); }
+  .note {
+    align-self: flex-start;
+    max-width: 82%;
+    background: var(--flag-bg);
+    color: var(--flag);
+    border-radius: 8px;
+    padding: 7px 11px;
+    font-size: 0.9rem;
+  }
+  .order {
+    align-self: flex-start;
+    max-width: 82%;
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.95rem;
+  }
+  .order h2 { margin: 0 0 6px; font-size: 1rem; }
+  .order ul { margin: 0 0 8px; padding-left: 18px; }
+  .order .total { font-weight: 650; }
+  form {
+    display: flex;
+    gap: 8px;
+    padding: 12px 14px;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+  }
+  input[type="text"] {
+    flex: 1;
+    font: inherit;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    min-width: 0;
+  }
+  .send {
+    background: var(--ink);
+    color: #fff;
+    border: 0;
+    border-radius: 8px;
+    padding: 0 18px;
+  }
+  .send:disabled { opacity: 0.5; cursor: default; }
+  :focus-visible { outline: 3px solid #2f7f74; outline-offset: 2px; }
+  @media (max-width: 480px) { .app { border: 0; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1 id="storeName">BATIK</h1>
+      <p id="storeNote">Real catalog from BATIK's public website (course demo, not affiliated).</p>
+    </div>
+    <div class="controls">
+      <select id="store" aria-label="Store">
+        <option value="store_002">BATIK (real catalog)</option>
+        <option value="store_001">Noor Collection (fictional)</option>
+      </select>
+      <button class="ghost" id="reset" type="button">New chat</button>
+    </div>
+  </header>
+  <div id="log" aria-live="polite"></div>
+  <form id="form">
+    <input type="text" id="text" placeholder="Type your message" autocomplete="off" aria-label="Message">
+    <button class="send" id="send" type="submit">Send</button>
+  </form>
+</div>
+
+<script>
+  const NOTES = {
+    store_002: "Real catalog from BATIK's public website (course demo, not affiliated).",
+    store_001: 'Fictional demo store. Ask about products, delivery, or place an order.',
+  };
+  const storeSelect = document.getElementById('store');
+  let STORE_ID = new URLSearchParams(location.search).get('store') || 'store_002';
+  storeSelect.value = STORE_ID;
+  if (storeSelect.value !== STORE_ID) storeSelect.value = STORE_ID = 'store_002';
+  function storeName() { return storeSelect.options[storeSelect.selectedIndex].text.replace(/ \(.*\)$/, ''); }
+  let conversationId = null;
+  const log = document.getElementById('log');
+  const form = document.getElementById('form');
+  const input = document.getElementById('text');
+  const sendBtn = document.getElementById('send');
+
+  function add(cls, text) {
+    const el = document.createElement('div');
+    el.className = cls;
+    el.textContent = text;
+    el.dir = 'auto'; // right-to-left text (Urdu script) lays out correctly
+    log.appendChild(el);
+    log.scrollTop = log.scrollHeight;
+    return el;
+  }
+
+  function showOrder(order) {
+    const box = document.createElement('div');
+    box.className = 'order';
+    const h = document.createElement('h2');
+    h.textContent = 'Order received';
+    box.appendChild(h);
+    const ul = document.createElement('ul');
+    (order.items || []).forEach((i) => {
+      const li = document.createElement('li');
+      const parts = [i.qty + ' x ' + i.name];
+      if (i.size) parts.push('size ' + i.size);
+      if (i.color) parts.push(i.color);
+      li.textContent = parts.join(', ') + ' (Rs. ' + (i.unit_price * i.qty).toLocaleString() + ')';
+      ul.appendChild(li);
+    });
+    box.appendChild(ul);
+    const total = document.createElement('div');
+    total.className = 'total';
+    total.textContent = 'Items: Rs. ' + (order.items_total || 0).toLocaleString() +
+      ' + delivery Rs. ' + (order.delivery_charge || 0).toLocaleString();
+    box.appendChild(total);
+    const c = order.customer || {};
+    const who = document.createElement('div');
+    who.textContent = [c.name, c.address, c.phone].filter(Boolean).join(' | ');
+    box.appendChild(who);
+    log.appendChild(box);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function reset() {
+    conversationId = null;
+    log.innerHTML = '';
+    document.getElementById('storeName').textContent = storeName();
+    document.getElementById('storeNote').textContent = NOTES[STORE_ID] || '';
+    add('msg bot', 'Assalam o alaikum! Welcome to ' + storeName() + '. How can I help you today?');
+    input.focus();
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const message = input.value.trim();
+    if (!message) return;
+    input.value = '';
+    add('msg customer', message);
+    const pending = add('msg bot pending', '...');
+    sendBtn.disabled = true;
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ store_id: STORE_ID, conversation_id: conversationId, message }),
+      });
+      if (!res.ok) throw new Error('Request failed (' + res.status + ')');
+      const data = await res.json();
+      conversationId = data.conversation_id;
+      pending.remove();
+      add('msg bot', data.reply);
+      if (data.order) showOrder(data.order);
+      if (data.escalate) add('note', 'The seller has been notified and will reply to you.');
+    } catch (err) {
+      pending.remove();
+      add('note', 'Could not reach the server. Check that the backend is running, then try again.');
+    } finally {
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  });
+
+  document.getElementById('reset').addEventListener('click', reset);
+  storeSelect.addEventListener('change', () => { STORE_ID = storeSelect.value; reset(); });
+  reset();
+</script>
+</body>
+</html>
