@@ -1,4 +1,4 @@
-# DukaanBot (starter)
+# DukaanBot
 
 AI sales assistant for a Pakistani clothing seller. Customers chat in Roman Urdu, Urdu or English; the bot answers from the seller's catalog, takes orders, and hands over to the seller when needed.
 
