@@ -1,0 +1,450 @@
+[
+  {
+    "id": 1,
+    "message": "Edinaa M size mein available hai?",
+    "facts": "BTK-001 size M in stock, Rs. 11,193 (sale, regular 15,990)",
+    "problems": [],
+    "reply": "Edinaa dress ka M size abhi in stock hai aur iska sale price Rs. 11193 hai.",
+    "intent": "product_question",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 2,
+    "message": "Amiraa ka price kya hai?",
+    "facts": "BTK-002 Rs. 13,293 sale price",
+    "problems": [],
+    "reply": "Amiraa 3Pc ka sale price Rs. 13293 hai (regular price Rs. 18990).",
+    "intent": "product_question",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 3,
+    "message": "Aquamarine 2 piece XL mein hai?",
+    "facts": "BTK-008 size XL in stock, Rs. 4,193",
+    "problems": [],
+    "reply": "Aquamarine 2Pc XL size abhi bhi in stock hai aur iska sale price Rs. 4193 hai.",
+    "intent": "product_question",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 4,
+    "message": "is the Kara 2 piece available in small?",
+    "facts": "BTK-009 size S in stock, Rs. 4,193",
+    "problems": [],
+    "reply": "Yes, the Kara 2Pc is available in Small (S) and costs Rs. 4,193.",
+    "intent": "product_question",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 5,
+    "message": "Edinaa red colour mein milega?",
+    "facts": "BTK-001 comes only in Blue; must not say red exists",
+    "problems": [],
+    "reply": "Sorry, Edinaa sirf blue colour mein hi available hai, red colour mein nahi mil sakti.",
+    "intent": "product_question",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 6,
+    "message": "Amiraa XXL size hai?",
+    "facts": "BTK-002 sizes XS-XL only; no XXL",
+    "problems": [],
+    "reply": "Amiraa dress mein XXL size available nahi hai, sirf XS se XL tak hai.",
+    "intent": "product_question",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 7,
+    "message": "Kara ka fabric kya hai?",
+    "facts": "BTK-009 lawn shirt, printed cambric culottes",
+    "problems": [],
+    "reply": "Kara ka fabric Lawn shirt aur printed cambric culottes ka hai.",
+    "intent": "product_question",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 8,
+    "message": "Lilac Dream milega?",
+    "facts": "BTK-029 sold out; must say sold out, no order",
+    "problems": [],
+    "reply": "Lilac Dream abhi sold out hai, is liye order nahi ho sakta. Aap Yasha Lilac (BTK-028) try kar sakte hain, jo available hai.",
+    "intent": "product_question",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 9,
+    "message": "Myra lawn dress chahiye M size",
+    "facts": "BTK-030 sold out",
+    "problems": [],
+    "reply": "Mujhe afsos hai, Myra lawn dress M size abhi sold out hai aur order nahi ki ja sakti.",
+    "intent": "product_question",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 10,
+    "message": "Sorbet farshi shalwar hai?",
+    "facts": "BTK-035 sold out",
+    "problems": [],
+    "reply": "Sorbet Farshi Shalwar abhi SOLD OUT hai, is liye hum isay order nahi kar sakte.",
+    "intent": "product_question",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 11,
+    "message": "Mavi M size mein available hai?",
+    "facts": "BTK-003 sizes not listed: give price Rs. 11,893, seller confirms size",
+    "problems": [
+      "reply has none of ['11,893', '11893']"
+    ],
+    "reply": "Mavi ka size aur color seller confirm karega.",
+    "intent": "product_question",
+    "escalate": true,
+    "escalate_reason": "details_not_listed",
+    "trace": {
+      "source": "llm_retry",
+      "first_problems": [
+        "BTK-003 has no sizes/colors on record; the reply must not confirm a size or color, the seller has to"
+      ],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 12,
+    "message": "Smoke 3 piece black colour mein hai?",
+    "facts": "BTK-021 colors not listed: seller confirms",
+    "problems": [],
+    "reply": "Smoke 3Pc ka sale price Rs. 12,593 hai, lekin color aur size ki details seller se confirm karni hongi.",
+    "intent": "product_question",
+    "escalate": true,
+    "escalate_reason": "details_not_listed",
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 13,
+    "message": "Halo luxe pret ki price?",
+    "facts": "BTK-025 Rs. 11,893",
+    "problems": [],
+    "reply": "Halo 3Pc ki sale price Rs. 11893 hai (regular price Rs. 16990).",
+    "intent": "product_question",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 14,
+    "message": "Joy festive eid print kitne ka hai",
+    "facts": "BTK-018 Rs. 9,443",
+    "problems": [],
+    "reply": "Joy 3Pc festive Eid print ka sale price Rs. 9443 hai.",
+    "intent": "product_question",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 15,
+    "message": "do you have men's kurta?",
+    "facts": "No men's items in catalog; say not available",
+    "problems": [],
+    "reply": "Sorry, we do not have men’s kurta in our catalog.",
+    "intent": "product_question",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 16,
+    "message": "delivery kitne din mein hogi?",
+    "facts": "7-10 working days, new collections 8-12",
+    "problems": [],
+    "reply": "Free shipping across Pakistan, delivery usually 7-10 working days (new collections 8-12 days).",
+    "intent": "policy",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 17,
+    "message": "delivery charges kitne hain?",
+    "facts": "Free shipping across Pakistan",
+    "problems": [],
+    "reply": "Delivery bilkul free hai across Pakistan, koi extra charge nahi lagta.",
+    "intent": "policy",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 18,
+    "message": "COD ho jayega?",
+    "facts": "Cash on delivery, no advance payment",
+    "problems": [],
+    "reply": "Yes, COD available for all orders and no advance payment required.",
+    "intent": "policy",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 19,
+    "message": "card se payment ho sakti hai?",
+    "facts": "Visa or MasterCard online",
+    "problems": [],
+    "reply": "Ji haan, aap Visa ya MasterCard credit/debit card se online payment kar sakte hain, ya cash on delivery bhi available hai.",
+    "intent": "policy",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 20,
+    "message": "sale wala suit exchange ho sakta hai?",
+    "facts": "Sale items cannot be exchanged or refunded",
+    "problems": [],
+    "reply": "Sale price par kharide hue suit exchange nahi ho sakte.",
+    "intent": "policy",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 21,
+    "message": "size chota nikla to exchange hoga?",
+    "facts": "Exchange only for damaged/defective/not matching specs within 7 days; sale items no exchange. Answer must not promise size exchange",
+    "problems": [],
+    "reply": "Sale price ke items ko exchange nahi kiya ja sakta, chahe size chota hi kyu na ho. Agar aap normal price ka item lete hain to 7 din ke andar exchange possible hai.",
+    "intent": "policy",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 22,
+    "message": "mujhe refund chahiye, suit phata hua aaya",
+    "facts": "Escalate (refund/defect)",
+    "problems": [],
+    "reply": "Is masle ke liye maazrat. Aap ka message seller ko bhej diya gaya hai, woh jald aap se rabta karenge.",
+    "intent": "complaint",
+    "escalate": true,
+    "escalate_reason": "refund",
+    "trace": {},
+    "grounded": true
+  },
+  {
+    "id": 23,
+    "message": "order 12 din se nahi aaya",
+    "facts": "Escalate (late delivery)",
+    "problems": [],
+    "reply": "Is masle ke liye maazrat. Aap ka message seller ko bhej diya gaya hai, woh jald aap se rabta karenge.",
+    "intent": "complaint",
+    "escalate": true,
+    "escalate_reason": "delivery_issue",
+    "trace": {},
+    "grounded": true
+  },
+  {
+    "id": 24,
+    "message": "thora discount de dein",
+    "facts": "Escalate (discount)",
+    "problems": [],
+    "reply": "Discount ka faisla seller karte hain. Aap ki request unhein bhej di gayi hai, woh jald jawab denge.",
+    "intent": "discount",
+    "escalate": true,
+    "escalate_reason": "discount",
+    "trace": {},
+    "grounded": true
+  },
+  {
+    "id": 25,
+    "message": "20 suits ka bulk order chahiye",
+    "facts": "Escalate (bulk)",
+    "problems": [],
+    "reply": "Bulk order mein dilchaspi ka shukriya. Aap ka message seller ko bhej diya gaya hai, woh aap se rabta karenge.",
+    "intent": "bulk",
+    "escalate": true,
+    "escalate_reason": "bulk_order",
+    "trace": {},
+    "grounded": true
+  },
+  {
+    "id": 26,
+    "message": "Edinaa 2 chahiye M size",
+    "facts": "BTK-001 M qty 2; ask for name, address, phone; qty 2 must be accepted",
+    "problems": [],
+    "reply": "Edinaa 3Pc dress M size available at Rs. 11193 each. Kitna quantity chahiye aur apna naam, address aur phone number bhej dein?",
+    "intent": "order",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 27,
+    "message": "ایڈینا کی قیمت کیا ہے؟",
+    "facts": "Urdu script; BTK-001 Rs. 11,193 (may fail: name in Urdu script)",
+    "problems": [],
+    "reply": "Edinaa 3Pc ki price Rs. 11193 hai.",
+    "intent": "product_question",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  },
+  {
+    "id": 28,
+    "message": "Assalam o alaikum",
+    "facts": "Greeting",
+    "problems": [],
+    "reply": "Walaikum assalam! BATIK mein khush aamdeed. Main aap ki kaise madad kar sakta hoon?",
+    "intent": "other",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {},
+    "grounded": true
+  },
+  {
+    "id": 29,
+    "message": "Sara Khan, House 5 Street 3 F-7 Islamabad, 03001234567",
+    "facts": "Order complete: BTK-008 size M qty 1 with name, address, phone",
+    "problems": [],
+    "reply": "Thank you Sara Khan, your Aquamarine 2Pc (M, Aqua Green) has been placed for Rs. 4,193. We will deliver to House 5 Street 3 F-7 Islamabad.",
+    "intent": "order",
+    "escalate": false,
+    "escalate_reason": null,
+    "trace": {
+      "source": "llm",
+      "first_problems": [],
+      "retry_problems": []
+    },
+    "grounded": true
+  }
+]

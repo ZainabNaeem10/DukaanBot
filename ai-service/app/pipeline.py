@@ -29,7 +29,7 @@ RULES
 2c. If a record shows a sale price and a regular price, the customer pays the sale price; you may mention the regular price.
 3. Write the reply in the customer's language style: Roman Urdu (Latin letters) if they wrote Roman Urdu, Urdu script if they wrote Urdu script, English if they wrote English, a natural mix if they mixed. Keep it short (1 to 3 sentences), polite and friendly. Write prices as Rs. 5,800.
 4. If the customer wants to order, ask for what is missing: which item, size and color (if the item has them), quantity, and their name, delivery address and phone number. Fill "order" ONLY when the customer has clearly chosen the items AND has given name, address and phone. Otherwise "order" must be null.
-5. "claims" must list EVERY price, size, color or stock fact you state in the reply, one entry per fact: {"sku", "size", "color", "in_stock", "price"} (use null for fields you did not state). Use the SKU codes from RECORDS.
+5. "claims" must list EVERY price, size, color or stock fact you state in the reply, one entry per fact: {"sku", "size", "color", "in_stock", "price"} (use null for fields you did not state). Use the SKU codes from RECORDS. "price" is a plain number (11193, not "Rs. 11,193"). For something the product does NOT have or is out of ("doesn't come in red", "no XXL", "sold out"), set "in_stock": false. Store policy facts (delivery, payment, exchange) are not claims: leave them out of "claims".
 6. Never promise discounts, refunds, delivery dates not in the policies, or anything else not in RECORDS.
 
 Return ONLY a JSON object with exactly these keys:
@@ -188,29 +188,38 @@ def respond(store_id, conversation_id, message, history=None, rag=None, groundin
 
     # 4. LLM generation, 5. grounding check (one retry with the checker's feedback).
     result = None
+    # trace: how this answer was produced, for the evaluation report (not used by the backend).
+    trace = {"source": "rules", "first_problems": [], "retry_problems": []}
     if llm.available():
         result = _generate(store, n, history, retrieved, rag)
+        trace["source"] = "llm" if result else "llm_failed"
         if result and grounding_on:
             problems = _problems(store, result)
             if problems:
+                trace["first_problems"] = problems
                 result = _generate(store, n, history, retrieved, rag, feedback=problems)
-                if result and _problems(store, result):
+                trace["source"] = "llm_retry"
+                if result:
+                    trace["retry_problems"] = _problems(store, result)
+                if not result or trace["retry_problems"]:
                     result = None
+                    trace["source"] = "rejected_then_rules"
 
     # 6. If there is no usable LLM answer, build a rule-based one from the catalog.
     if result is None:
         fb = fallback.reply(store, n, retrieved, lang) if rag else None
         if fb:
             reason = fb[2] if len(fb) > 2 else None
-            return _resp(fb[0], lang, fb[1], bool(reason), reason, grounded=True)
-        return _resp(templates.handover("default", lang), lang, "other", True, "low_confidence", grounded=False)
+            return dict(_resp(fb[0], lang, fb[1], bool(reason), reason, grounded=True), trace=trace)
+        return dict(_resp(templates.handover("default", lang), lang, "other", True, "low_confidence",
+                          grounded=False), trace=trace)
 
     language = result["language"] if result["language"] in LANGS else lang
     intent = result["intent"] if result["intent"] in INTENTS else "other"
     order = result["order"] if result["order"] and result["order"]["items"] else None
     escalate, reason = _needs_seller(store, result)
-    return _resp(result["reply"], language, "order" if order else intent, escalate, reason, order,
-                 grounded=grounding_on)
+    return dict(_resp(result["reply"], language, "order" if order else intent, escalate, reason, order,
+                      grounded=grounding_on), trace=trace)
 
 
 def reindex():

@@ -21,6 +21,7 @@ Whether the reply states the right facts (see "facts") still needs a human read;
 """
 import argparse
 import json
+import re
 import sys
 import time
 import urllib.error
@@ -95,6 +96,10 @@ def main():
         row["intent"] = r.get("intent")
         row["escalate"] = r.get("escalate")
         row["escalate_reason"] = r.get("escalate_reason")
+        tr = r.get("trace") or {}
+        row["trace"] = tr
+        src = tr.get("source", "unknown")
+        counts["src_" + src] = counts.get("src_" + src, 0) + 1
         row["grounded"] = r.get("grounded")
 
         if r.get("intent") == t["expected_intent"]:
@@ -107,7 +112,8 @@ def main():
             row["problems"].append("escalate %r, expected %r" % (r.get("escalate"), t["expected_escalate"]))
         if t.get("must_include_any"):
             counts["include_total"] += 1
-            reply = (r.get("reply") or "").lower()
+            # models sometimes write "7‑10" with a non-breaking hyphen or en dash
+            reply = re.sub(r"[\u2010-\u2015\u2212]", "-", (r.get("reply") or "").lower())
             if any(s.lower() in reply for s in t["must_include_any"]):
                 counts["include"] += 1
             else:
@@ -130,6 +136,12 @@ def main():
             print("          bot said: %s" % row["reply"])
             if row.get("escalate_reason"):
                 print("          handover reason: %s" % row["escalate_reason"])
+        if tr.get("first_problems"):
+            print("          fact check rejected the first answer: %s" % "; ".join(tr["first_problems"]))
+            if tr.get("retry_problems"):
+                print("          ...and the retry: %s -> rule-based answer sent" % "; ".join(tr["retry_problems"]))
+            else:
+                print("          ...the retry passed")
 
     n = len(tests)
     print("\n" + "=" * 50)
@@ -141,6 +153,15 @@ def main():
     if counts["order_total"]:
         print("Order extracted         : %d/%d" % (counts["order"], counts["order_total"]))
     print("Marked grounded         : %d/%d" % (counts["grounded"], n))
+    labels = [("llm", "LLM answer passed first time"), ("llm_retry", "rejected, fixed on retry"),
+              ("rejected_then_rules", "rejected twice -> rules"), ("rules", "rule-based (no LLM call)"),
+              ("llm_failed", "LLM call failed -> rules"),
+              ("unknown", "fixed reply (greeting or handover rule)")]
+    if any(k.startswith("src_") for k in counts):
+        print("How answers were made:")
+        for key, label in labels:
+            if counts.get("src_" + key):
+                print("  %-34s: %d" % (label, counts["src_" + key]))
     Path(args.out).write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8")
     print("Full results written to %s" % args.out)
     print("Facts still need a human read: compare each reply with the 'facts' column in test_messages.json")

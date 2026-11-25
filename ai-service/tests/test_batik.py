@@ -217,3 +217,55 @@ class TestBatikSecondLiveRun(unittest.TestCase):
                    needs_seller=True, needs_seller_reason="shop_address_unknown")
         with FakeLLM(q):
             self.assertTrue(run("aap ki shop kahan hai?")["escalate"])
+
+
+class TestFactCheckFalseAlarms(unittest.TestCase):
+    """Third live run (24 Nov): 17 of 24 LLM answers were rejected, mostly by false alarms.
+    Each test replays one kind of claim the model actually sent, plus a real mistake that must still fail."""
+
+    @classmethod
+    def setUpClass(cls):
+        catalog.reset()
+        cls.store = catalog.get_store(STORE)
+
+    def check(self, reply, *claims):
+        return grounding.verify(self.store, answer(reply=reply, claims=list(claims)))
+
+    def claim(self, **kw):
+        c = {"sku": "BTK-001", "size": None, "color": None, "in_stock": None, "price": None}
+        c.update(kw)
+        return c
+
+    def test_price_written_as_text(self):
+        for price in ("Rs. 11,193", "11,193", "11193", 11193.0):
+            self.assertEqual(self.check("Edinaa Rs. 11,193 ki hai.", self.claim(price=price)), [], price)
+
+    def test_wrong_price_still_caught_in_any_format(self):
+        self.assertTrue(self.check("Edinaa Rs. 9,000 ki hai.", self.claim(price="Rs. 9,000")))
+
+    def test_regular_price_claim_ok(self):
+        self.assertEqual(self.check("Pehle Rs. 15,990 thi.", self.claim(price=15990)), [])
+
+    def test_policy_fact_without_sku(self):
+        for sku in (None, "", "None", "policy"):
+            self.assertEqual(self.check("COD available hai, free delivery.", self.claim(sku=sku, price=None)), [])
+
+    def test_negative_color_and_size_claims(self):
+        self.assertEqual(self.check("Edinaa red mein nahi aati, sirf Blue.",
+                                    self.claim(color="red", in_stock=False)), [])
+        self.assertEqual(self.check("Amiraa XXL mein nahi hai.",
+                                    self.claim(sku="BTK-002", size="XXL", in_stock="false")), [])
+
+    def test_positive_wrong_color_and_size_still_caught(self):
+        self.assertTrue(self.check("Edinaa red mein hai.", self.claim(color="red", in_stock=True)))
+        self.assertTrue(self.check("Amiraa XXL hai.", self.claim(sku="BTK-002", size="XXL")))
+
+    def test_sold_out_unlisted_product_negative_claim(self):
+        self.assertEqual(self.check("Myra M size sold out hai.",
+                                    self.claim(sku="BTK-030", size="M", in_stock=False)), [])
+
+    def test_unlisted_product_size_confirmation_still_caught(self):
+        self.assertTrue(self.check("Mavi M available hai.", self.claim(sku="BTK-003", size="M", in_stock=True)))
+
+    def test_made_up_number_in_reply_still_caught(self):
+        self.assertTrue(self.check("Delivery Rs. 350 hai.", self.claim(sku=None)))

@@ -62,6 +62,27 @@ def _color_ok(product, color):
     return any(c in pc.lower() or pc.lower() in c for pc in product["colors"])
 
 
+def _as_price(v):
+    """Models write prices as 11193, "11193", "11,193" or "Rs. 11,193". Returns an int, or None if absent."""
+    if v is None or isinstance(v, bool):
+        return None
+    if isinstance(v, (int, float)):
+        return int(round(v))
+    m = re.search(r"\d[\d,]*(?:\.\d+)?", str(v))  # first number, so the dot in "Rs." is ignored
+    return int(round(float(m.group(0).replace(",", "")))) if m else None
+
+
+def _as_bool(v):
+    if isinstance(v, bool) or v is None:
+        return v
+    s = str(v).strip().lower()
+    if s in ("true", "yes", "available", "in stock", "1"):
+        return True
+    if s in ("false", "no", "not available", "out of stock", "sold out", "0"):
+        return False
+    return None
+
+
 def verify(store, result):
     """Return a list of problems (empty list = reply is grounded)."""
     problems = []
@@ -69,30 +90,35 @@ def verify(store, result):
     for c in result.get("claims") or []:
         if not isinstance(c, dict):
             continue
-        p = products.get(str(c.get("sku", "")).upper())
+        sku = str(c.get("sku") or "").strip()
+        if not sku or sku.lower() in ("none", "null", "policy", "store"):
+            continue  # store/policy facts: covered by the number check on the reply below
+        p = products.get(sku.upper())
         if not p:
             problems.append("claim about unknown sku %r" % c.get("sku"))
             continue
-        if not p.get("available", True) and c.get("in_stock"):
+        in_stock = _as_bool(c.get("in_stock"))
+        negative = in_stock is False  # "not available", "doesn't come in red": consistent with a missing size/color
+        if not p.get("available", True) and in_stock:
             problems.append("%s is sold out, but the reply says it is in stock" % p["sku"])
         if not p.get("details_known", True) and (c.get("size") or c.get("color")):
-            problems.append("%s has no sizes/colors on record; the reply must not confirm a size or color, "
-                            "the seller has to" % p["sku"])
+            if not negative and p.get("available", True):
+                problems.append("%s has no sizes/colors on record; the reply must not confirm a size or color, "
+                                "the seller has to" % p["sku"])
             continue
         if c.get("size"):
             size = _match_size(p, c["size"])
             if size is None:
-                problems.append("%s is not made in size %s (sizes: %s)" % (p["sku"], c["size"], ", ".join(p["sizes"])))
-            elif c.get("in_stock") is not None and bool(c["in_stock"]) != (p["stock"].get(size, 0) > 0):
-                problems.append("stock claim wrong: %s size %s has %s units" % (p["sku"], size, p["stock"].get(size, 0)))
-        if c.get("color") and not _color_ok(p, c["color"]):
+                if not negative:
+                    problems.append("%s is not made in size %s (sizes: %s)" % (p["sku"], c["size"], ", ".join(p["sizes"])))
+            elif in_stock is not None and in_stock != (p["stock"].get(size, 0) > 0):
+                problems.append("stock claim wrong: %s size %s is %s" % (
+                    p["sku"], size, "in stock" if p["stock"].get(size, 0) > 0 else "out of stock"))
+        if c.get("color") and not _color_ok(p, c["color"]) and not negative:
             problems.append("%s does not come in %s (colors: %s)" % (p["sku"], c["color"], ", ".join(p["colors"])))
-        if c.get("price") is not None:
-            try:
-                if abs(float(c["price"]) - p["price"]) > 0.5:
-                    problems.append("price claim wrong: %s costs Rs. %s" % (p["sku"], p["price"]))
-            except (TypeError, ValueError):
-                problems.append("price claim is not a number")
+        price = _as_price(c.get("price"))
+        if price is not None and price not in (p["price"], p.get("regular_price")):
+            problems.append("price claim wrong: %s costs Rs. %s" % (p["sku"], p["price"]))
     allowed = allowed_numbers(store, result.get("order"))
     for n in _numbers(result.get("reply", "")):
         if n >= 100 and n not in allowed:

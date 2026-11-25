@@ -49,6 +49,7 @@ class RespondResponse(BaseModel):
     escalate_reason: Optional[str] = None
     order: Optional[Order] = None
     grounded: bool
+    trace: Optional[dict] = None  # how the answer was made (for the evaluation report; backend ignores it)
 
 
 @app.get("/health")
