@@ -20,4 +20,10 @@ def rule_escalation(n):
         return "bulk", "bulk_order"
     if f["discount"]:
         return "discount", "discount"
+    if f.get("abroad"):
+        # our records only cover delivery within Pakistan (real comment: "Why not available in UK website?")
+        return "policy", "international"
+    if f.get("seller_only"):
+        # a link to a page/collection is not a question about a product
+        return ("other" if "link" in n["tokens"] else "product_question"), "seller_only"
     return None

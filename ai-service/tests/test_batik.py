@@ -269,3 +269,75 @@ class TestFactCheckFalseAlarms(unittest.TestCase):
 
     def test_made_up_number_in_reply_still_caught(self):
         self.assertTrue(self.check("Delivery Rs. 350 hai.", self.claim(sku=None)))
+
+
+class TestRealComments(unittest.TestCase):
+    """Real Instagram comments (25 Nov) that the rules must catch before the LLM is called."""
+
+    def test_order_status_complaints_go_to_seller(self):
+        for m in ("M ny 21 date ko order placed kiya but still koi update nai hy please check the problem",
+                  "where is my order", "order not received yet"):
+            r = run(m)
+            self.assertTrue(r["escalate"], m)
+            self.assertEqual(r["escalate_reason"], "delivery_issue", m)
+
+    def test_ordering_is_not_a_complaint(self):
+        for m in ("Order kaisy krna hai", "Edinaa order karna hai"):
+            self.assertNotEqual(run(m)["escalate_reason"], "delivery_issue", m)
+
+
+class TestRealCommentsRound2(unittest.TestCase):
+    """Run of 25 Nov 12:16: the 'unless' prompt rule made the model over-hand-over. Handover for
+    seller-only topics is now decided by rules, and the model's handovers are filtered in code."""
+
+    def setUp(self):
+        catalog.reset()
+        retrieval.reset()
+
+    def test_seller_only_topics_handed_over_by_rules_without_llm(self):
+        for m in ("When will you restock velvet dresses ??", "restock kab ho ga?", "Shirt length",
+                  "Size guide please", "What's actual shade ?", "Is it same color in real ?",
+                  "Link? Cant find the collection on the site"):
+            with FakeLLM(answer()) as fake:
+                r = run(m)
+            self.assertTrue(r["escalate"], m)
+            self.assertEqual(r["escalate_reason"], "seller_only", m)
+            self.assertEqual(r["intent"], "other" if "Link" in m else "product_question", m)
+            self.assertIn("?", r["reply"], m)  # asks which product
+            self.assertEqual(fake.prompts, [], m)
+
+    def test_normal_questions_are_not_seller_only(self):
+        for m in ("Edinaa M size mein hai?", "Edinaa red colour mein milega?", "Order kaisy krna hai",
+                  "Fabric and price", "Yeh clr konsa he?", "In stock?"):
+            with FakeLLM(answer()):
+                self.assertNotEqual(run(m)["escalate_reason"], "seller_only", m)
+
+    def _llm(self, message, reply, reason, claims=None):
+        a = answer(reply=reply, claims=claims or [], needs_seller=True, needs_seller_reason=reason)
+        with FakeLLM(a):
+            return run(message)
+
+    def test_which_product_question_is_not_a_handover(self):
+        cases = [("Is the trouser also velvet v", "Could you please tell me which dress you are referring to?",
+                  "details_not_listed"),
+                 ("Yeh clr konsa he?", "Aap kis product ki colour ke baare mein pooch rahe hain?", "color_detail"),
+                 ("Stuff kon sa hai", "Aap kis product ka kapra jan'na chahte hain?", "no_catalog_info")]
+        for m, reply, reason in cases:
+            self.assertFalse(self._llm(m, reply, reason)["escalate"], m)
+
+    def test_price_question_on_unlisted_product_is_not_a_handover(self):
+        r = self._llm("Joy festive eid print kitne ka hai", "Joy 3Pc ka sale price Rs. 9443 hai.",
+                      "details_not_listed", [{"sku": "BTK-018", "size": None, "color": None,
+                                              "in_stock": None, "price": 9443}])
+        self.assertFalse(r["escalate"])
+
+    def test_size_question_on_unlisted_product_keeps_handover_and_adds_price(self):
+        r = self._llm("Mavi M size mein available hai?",
+                      "Mavi dress ke sizes aur colors seller confirm karega.", "details_not_listed")
+        self.assertTrue(r["escalate"])
+        self.assertIn("11,893", r["reply"])
+
+    def test_unknown_info_without_question_still_handed_over(self):
+        r = self._llm("Why not available in UK website?",
+                      "Sorry, I don't have that information. Our seller will get back to you.", "seller_info")
+        self.assertTrue(r["escalate"])

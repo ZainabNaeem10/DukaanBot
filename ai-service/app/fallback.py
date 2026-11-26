@@ -2,6 +2,8 @@
 Rule-based replies used when the LLM is unavailable, fails, or fails the grounding check.
 Answers come straight from catalog data, so they are always grounded (but less natural).
 """
+import re
+
 from . import normalize, templates
 
 _STOP = {"have", "want", "need", "with", "this", "that", "what", "which", "there", "your", "from", "does",
@@ -77,6 +79,14 @@ def _product_reply_full(store, p, n, lang):
     return " ".join(parts)
 
 
+def _mentions(p, n):
+    """True if the message names this product (a word of its name, or its SKU)."""
+    if p["sku"].lower() in {s.lower() for s in n["slots"]["skus"]}:
+        return True
+    words = {w.lower() for w in re.findall(r"[A-Za-z]+", p["name"]) if len(w) >= 3}
+    return bool(words & set(n["tokens"]))
+
+
 def reply(store, n, retrieved, lang):
     """Return (reply, intent) or None if no reasonable answer can be built."""
     chunks = retrieved.get("chunks", []) if retrieved else []
@@ -95,6 +105,11 @@ def reply(store, n, retrieved, lang):
         return templates.not_available(lang), "product_question"
 
     p = store["products"][products[0]["sku"]]
+    if not _mentions(p, n):
+        # "I want to order this" / "in stock?": the customer means a photo we cannot see. Do not guess.
+        text = ("Aap kis product ke baare mein pooch rahe hain? Us ka naam bata dein." if ro
+                else "Which product are you asking about? Please send its name.")
+        return text, ("order" if ordering else "product_question")
     text, reason = _product_reply(store, p, n, lang)
     if reason:
         return text, "product_question", reason

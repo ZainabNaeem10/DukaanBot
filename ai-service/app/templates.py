@@ -33,6 +33,14 @@ _HANDOVER = {
         "roman_urdu": "Discount ka faisla seller karte hain. Aap ki request unhein bhej di gayi hai, woh jald jawab denge.",
         "ur": "رعایت کا فیصلہ فروخت کنندہ کرتے ہیں۔ آپ کی درخواست انہیں بھیج دی گئی ہے۔",
     },
+    "seller_only": {
+        "en": "The seller will answer this for you, and I have passed your message to them. "
+              "Which product are you asking about? Please send its name so they can check.",
+        "roman_urdu": "Yeh maloomat seller aap ko dein ge, maine aap ka sawal unhein bhej diya hai. "
+                      "Aap kis product ke baare mein pooch rahe hain? Us ka naam bata dein.",
+        "ur": "یہ معلومات فروخت کنندہ آپ کو دیں گے، میں نے آپ کا سوال انہیں بھیج دیا ہے۔ "
+              "آپ کس پروڈکٹ کے بارے میں پوچھ رہے ہیں؟ اس کا نام بتا دیں۔",
+    },
     "bulk_order": {
         "en": "Thank you for your interest in a bulk order. I have passed this to the seller, who will contact you with the details.",
         "roman_urdu": "Bulk order mein dilchaspi ka shukriya. Aap ka message seller ko bhej diya gaya hai, woh aap se rabta karenge.",

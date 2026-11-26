@@ -18,7 +18,8 @@ SYSTEM = """You are DukaanBot, the WhatsApp sales assistant of a small Pakistani
 Reply to the customer's latest message.
 
 RULES
-1. Use ONLY the facts in RECORDS (products, prices, sizes, stock, policies). Never invent a product, price, size, color, stock level or policy. If the customer asks for a kind of item the store clearly does not sell (nothing like it in RECORDS), say it is not in the catalog and set needs_seller to false. If the answer is not in RECORDS and only the seller could know it (for example the shop address, or you cannot tell which product the customer means), say so and set needs_seller to true.
+1. Use ONLY the facts in RECORDS (products, prices, sizes, stock, policies). Never invent a product, price, size, color, stock level or policy. If the customer asks for a kind of item the store clearly does not sell (nothing like it in RECORDS), say it is not in the catalog and set needs_seller to false. If the answer is not in RECORDS and only the seller could know it (for example the shop address, a restock date, a size guide, or how a colour looks in real life), say so and set needs_seller to true. If the customer does not say which product they mean ("this", "yeh suit", "price please" — they are looking at a photo you cannot see), ask them which product (its name) and set needs_seller to false.
+Never state an order's status (processed, shipped, delayed): you cannot see orders. For "where is my order" hand over to the seller.
 2. A size with 0 stock (or marked "out of stock") is out of stock: say so. A size or color that is not listed does not exist: say so. A product marked SOLD OUT cannot be ordered: say it is sold out and, if useful, suggest a similar available product from RECORDS.
 2b. If a product says its sizes/colors are NOT LISTED, do not confirm or deny any size or color for it: give the price, say the seller will confirm the size/color, and set needs_seller to true with reason "details_not_listed". Never put such a product in "order". This applies ONLY when the customer is asking about or ordering that product; other products in RECORDS being NOT LISTED is not a reason to set needs_seller.
 2d. When the customer sends their name, address and phone, the item they want is the one from the CONVERSATION SO FAR: complete that order.
@@ -66,7 +67,10 @@ def _build_query(n, history):
     return query
 
 
-def _needs_seller(store, result):
+_DETAIL_WORDS = {"size", "sizes", "color", "colour", "colors", "rang", "clr", "fabric", "kapra", "stuff", "shade"}
+
+
+def _needs_seller(store, result, n=None):
     """Keep the model's handover, except a "details_not_listed" handover when no product the reply is
     about (claims or order) actually lacks details: the model sometimes applies that rule just because
     other records in the list are NOT LISTED."""
@@ -77,14 +81,52 @@ def _needs_seller(store, result):
     # The bot handles these itself: it asked the customer a question, or the item is simply not sold.
     if any(w in low for w in ("clarif", "not_in_catalog", "not in catalog", "not_in_the_catalog")):
         return False, None
-    if "not_listed" in reason or "not listed" in reason.lower():
-        skus = [str(c.get("sku", "")).upper() for c in result["claims"] if isinstance(c, dict)]
-        skus += [it["sku"] for it in (result["order"] or {}).get("items", [])]
-        products = [store["products"].get(s) for s in skus if store["products"].get(s)]
-        if products and all(p["details_known"] and p["available"] for p in products):
+    skus = [str(c.get("sku") or "").upper() for c in result["claims"] if isinstance(c, dict)]
+    skus += [it["sku"] for it in (result["order"] or {}).get("items", [])]
+    products = [store["products"].get(s) for s in skus if store["products"].get(s)]
+    products += _named_products(store, n)
+    if "not_listed" in reason or "not listed" in low or "detail" in low:
+        # Only a real handover if the customer asked about size/colour/fabric of a product whose details
+        # we do not have. A plain price question ("Joy kitne ka hai") or no product at all is not one.
+        asked_details = n is None or bool(n["slots"]["sizes"] or n["slots"]["colors"]
+                                          or set(n["tokens"]) & _DETAIL_WORDS)
+        if not products or not asked_details or all(p["details_known"] and p["available"] for p in products):
             return False, None
         reason = "details_not_listed"
+    elif not products and "?" in result["reply"]:
+        # No product identified and the reply asks the customer something ("which product?"): the customer
+        # answers the bot, not the seller. Seller-only topics never reach here (rules hand them over first).
+        return False, None
     return True, reason
+
+
+_GENERIC_NAME_WORDS = {"3pc", "2pc", "1pc", "embroidered", "printed", "lawn", "dress", "pret", "luxe", "casual",
+                       "festive", "eid", "prints", "solid", "farshi", "shalwar", "the"}
+
+
+def _named_products(store, n):
+    """Products whose distinctive name word ("mavi", "edinaa") appears in the customer's message."""
+    if n is None:
+        return []
+    toks = set(n["tokens"])
+    out = []
+    for p in store["products"].values():
+        words = {w.lower() for w in re.findall(r"[A-Za-z]+", p["name"])} - _GENERIC_NAME_WORDS
+        if any(len(w) >= 3 and w in toks for w in words):
+            out.append(p)
+    return out
+
+
+def _add_price(store, result, reason, n=None):
+    """When a product with unlisted details is handed over, the reply should still give its price."""
+    if reason != "details_not_listed":
+        return result["reply"]
+    reply = result["reply"]
+    candidates = [store["products"].get(str(c.get("sku") or "").upper()) for c in result["claims"] if isinstance(c, dict)]
+    for p in [c for c in candidates if c] + _named_products(store, n):
+        if p["available"] and "{:,}".format(p["price"]) not in reply and str(p["price"]) not in reply:
+            return reply.rstrip() + " Price: Rs. {:,}.".format(p["price"])
+    return reply
 
 
 def _catalog_index(store):
@@ -113,7 +155,9 @@ def _prompt(store, n, history, retrieved, rag, feedback=None):
         records, hist, n["language"], n["original"])
     if feedback:
         text += ("\nYour previous answer was rejected by the fact checker for these reasons:\n- " +
-                 "\n- ".join(feedback) + "\nWrite a corrected answer using ONLY the RECORDS.\n")
+                 "\n- ".join(feedback) + "\nWrite a corrected answer using ONLY the RECORDS. Fix only what was "
+                 "rejected and keep every correct fact from your previous answer, especially the product's "
+                 "price.\n")
     return text
 
 
@@ -193,6 +237,8 @@ def respond(store_id, conversation_id, message, history=None, rag=None, groundin
     if llm.available():
         result = _generate(store, n, history, retrieved, rag)
         trace["source"] = "llm" if result else "llm_failed"
+        if not result:
+            trace["llm_error"] = (llm.LAST_ERROR or "")[:300]
         if result and grounding_on:
             problems = _problems(store, result)
             if problems:
@@ -217,7 +263,8 @@ def respond(store_id, conversation_id, message, history=None, rag=None, groundin
     language = result["language"] if result["language"] in LANGS else lang
     intent = result["intent"] if result["intent"] in INTENTS else "other"
     order = result["order"] if result["order"] and result["order"]["items"] else None
-    escalate, reason = _needs_seller(store, result)
+    escalate, reason = _needs_seller(store, result, n)
+    result["reply"] = _add_price(store, result, reason, n)
     return dict(_resp(result["reply"], language, "order" if order else intent, escalate, reason, order,
                       grounded=grounding_on), trace=trace)
 

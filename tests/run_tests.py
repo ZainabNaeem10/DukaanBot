@@ -20,6 +20,8 @@ Checks per message:
 Whether the reply states the right facts (see "facts") still needs a human read; use results.json for that.
 """
 import argparse
+import csv
+import io
 import json
 import re
 import sys
@@ -34,6 +36,56 @@ except AttributeError:
     pass
 
 HERE = Path(__file__).parent
+
+
+REAL_CSV = HERE / "real_questions_batik.csv"
+INTENTS = {"product_question", "policy", "order", "complaint", "discount", "bulk", "other"}
+
+
+def _yes(v):
+    s = (v or "").strip().lower()
+    if s in ("yes", "y", "true", "1", "haan"):
+        return True
+    if s in ("no", "n", "false", "0", "nahi", ""):
+        return False
+    raise ValueError("expected_escalate must be yes or no, got %r" % v)
+
+
+def load_real_questions(path):
+    """Real customer questions copied by hand from public pages (see docs/real-questions-guide.md).
+    One row per question. Rows whose message starts with # are ignored (the example row)."""
+    raw = path.read_bytes()
+    try:
+        text = raw.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        text = raw.decode("cp1252")
+        print("WARNING: %s is not saved as UTF-8; Urdu text may be broken. In Excel use "
+              "Save As > 'CSV UTF-8 (Comma delimited)'." % path.name)
+    out = []
+    for line_no, row in enumerate(csv.DictReader(io.StringIO(text)), start=2):
+        extra = row.pop(None, None)  # an unquoted comma makes extra columns: glue them back on
+        if extra and row.get("must_include_any") is not None:
+            row["must_include_any"] = ",".join([row["must_include_any"]] + list(extra))
+        row = {(k or "").strip().lower(): (v or "").strip() for k, v in row.items() if isinstance(v, str) or v is None}
+        msg = row.get("message", "")
+        if not msg or msg.startswith("#"):
+            continue
+        intent = row.get("expected_intent", "").lower()
+        try:
+            if intent not in INTENTS:
+                raise ValueError("expected_intent must be one of %s, got %r" % (", ".join(sorted(INTENTS)), intent))
+            esc = _yes(row.get("expected_escalate"))
+        except ValueError as e:
+            print("SKIPPED %s line %d: %s" % (path.name, line_no, e))
+            continue
+        t = {"id": "R%d" % (len(out) + 1), "message": msg, "expected_intent": intent, "expected_escalate": esc,
+             "facts": row.get("facts", ""), "source": "real",
+             "found_on": row.get("found_on", ""), "date_found": row.get("date_found", "")}
+        inc = [s.strip() for s in row.get("must_include_any", "").split("|") if s.strip()]
+        if inc:
+            t["must_include_any"] = inc
+        out.append(t)
+    return out
 
 
 def call(url, payload, query=""):
@@ -55,6 +107,7 @@ def main():
     ap.add_argument("--out", default=str(HERE / "results.json"))
     ap.add_argument("--delay", type=float, default=2.0,
                     help="seconds to wait between messages (free LLM plans limit requests per minute)")
+    ap.add_argument("--no-real", action="store_true", help="skip tests/real_questions_batik.csv")
     ap.add_argument("--no-rag", action="store_true", help="baseline: plain LLM, no catalog retrieval")
     ap.add_argument("--no-grounding", action="store_true", help="skip the grounding check")
     args = ap.parse_args()
@@ -69,10 +122,17 @@ def main():
         name = "test_messages_batik.json" if args.store == "store_002" else "test_messages.json"
         args.tests = str(HERE / name)
     tests = json.loads(Path(args.tests).read_text(encoding="utf-8"))
+    for t in tests:
+        t.setdefault("source", "written")
+    if args.store == "store_002" and not args.no_real and REAL_CSV.exists():
+        real = load_real_questions(REAL_CSV)
+        tests += real
+        print("Loaded %d real customer questions from %s" % (len(real), REAL_CSV.name))
     results = []
     counts = {"intent": 0, "escalate": 0, "include": 0, "include_total": 0,
               "order": 0, "order_total": 0, "grounded": 0, "errors": 0}
 
+    llm_errors = {}
     for i, t in enumerate(tests):
         if i and args.delay:
             time.sleep(args.delay)
@@ -82,14 +142,15 @@ def main():
             "message": t["message"],
             "history": t.get("history", []),
         }
-        row = {"id": t["id"], "message": t["message"], "facts": t["facts"], "problems": []}
+        row = {"id": t["id"], "message": t["message"], "facts": t["facts"], "problems": [],
+               "source": t.get("source", "written")}
         try:
             r = call(args.url, payload, query)
         except (urllib.error.URLError, ValueError, OSError) as e:
             counts["errors"] += 1
             row.update(reply=None, problems=["request failed: %s" % e])
             results.append(row)
-            print("[ERR ] %2d  %s" % (t["id"], e))
+            print("[ERR ] %3s  %s" % (t["id"], e))
             continue
 
         row["reply"] = r.get("reply")
@@ -100,6 +161,8 @@ def main():
         row["trace"] = tr
         src = tr.get("source", "unknown")
         counts["src_" + src] = counts.get("src_" + src, 0) + 1
+        if tr.get("llm_error"):
+            llm_errors[tr["llm_error"]] = llm_errors.get(tr["llm_error"], 0) + 1
         row["grounded"] = r.get("grounded")
 
         if r.get("intent") == t["expected_intent"]:
@@ -129,7 +192,7 @@ def main():
 
         results.append(row)
         status = "PASS" if not row["problems"] else "FAIL"
-        print("[%s] %2d  %s" % (status, t["id"], t["message"]))
+        print("[%s] %3s  %s" % (status, t["id"], t["message"]))
         for p in row["problems"]:
             print("          - " + p)
         if row["problems"] and row.get("reply") is not None:
@@ -153,6 +216,14 @@ def main():
     if counts["order_total"]:
         print("Order extracted         : %d/%d" % (counts["order"], counts["order_total"]))
     print("Marked grounded         : %d/%d" % (counts["grounded"], n))
+    sources = sorted({r.get("source", "written") for r in results})
+    if len(sources) > 1:
+        print("By source (all checks passed):")
+        for s in sources:
+            rows = [r for r in results if r.get("source", "written") == s]
+            ok = sum(1 for r in rows if r.get("reply") is not None and not r["problems"])
+            print("  %-34s: %d/%d (%d%%)" % ("real customer questions" if s == "real" else "written by us",
+                                            ok, len(rows), round(100.0 * ok / len(rows))))
     labels = [("llm", "LLM answer passed first time"), ("llm_retry", "rejected, fixed on retry"),
               ("rejected_then_rules", "rejected twice -> rules"), ("rules", "rule-based (no LLM call)"),
               ("llm_failed", "LLM call failed -> rules"),
@@ -163,6 +234,13 @@ def main():
             if counts.get("src_" + key):
                 print("  %-34s: %d" % (label, counts["src_" + key]))
     Path(args.out).write_text(json.dumps(results, indent=2, ensure_ascii=False), encoding="utf-8")
+    if llm_errors:
+        print("LLM ERRORS (these messages were answered by the rule-based backup):")
+        for err, k in sorted(llm_errors.items(), key=lambda x: -x[1]):
+            print("  %dx %s" % (k, err.replace("\n", " ")[:200]))
+        if any("429" in e or "rate" in e.lower() for e in llm_errors):
+            print("  -> Groq free-plan limit reached. Wait (limits reset over time) or see "
+                  "https://console.groq.com/settings/limits. Re-run later for a fair result.")
     print("Full results written to %s" % args.out)
     print("Facts still need a human read: compare each reply with the 'facts' column in test_messages.json")
 

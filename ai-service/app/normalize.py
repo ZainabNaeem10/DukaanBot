@@ -117,6 +117,15 @@ _SKU_RE = re.compile(r"^[a-z]{3}-\d{3}$")
 _URDU_CHARS = re.compile(r"[\u0600-\u06FF]")
 _LATIN_WORD = re.compile(r"[A-Za-z]{2,}")
 _SIZE_NEXT = {"size", "mein", "available", "hai", "stock", "wala", "wali", "ka"}
+# Questions only the seller can answer, whichever product it is (real Instagram comments, 25 Nov):
+# restock dates, size guides, measurements, how a colour looks in real life, links to collections.
+_SELLER_ONLY = re.compile(
+    r"\bre-?stock|\bdobara (?:kab|aa)|\bsize (?:guide|chart)|\bmeasurements?\b|\blength\b|\blambai\b"
+    r"|\b(?:actual|real|asal|asli) (?:shade|colou?r|clr|rang)\b|\bin real\b|\breal (?:life|mein|me)\b"
+    r"|\blink\b")
+_ABROAD = re.compile(r"\b(?:uk|usa|canada|uae|dubai|abroad|international|internationally|overseas|worldwide)\b"
+                     r"|\boutside pakistan\b")
+_NOT_RECEIVED = re.compile(r"\bnot (?:yet )?(?:received|delivered|arrived)\b|\bstill waiting\b")
 _DELIVERY_ISSUE = re.compile(r"\bnahi (?:aaya|aayi|ayi|pohancha|pahuncha|mila|mili)\b")
 
 
@@ -206,8 +215,13 @@ def normalize(text):
         "discount": "discount" in tokset,
         "bulk": "bulk" in tokset or bool(qty and qty >= 10),
         "custom": "custom" in tokset,
-        "delivery_issue": bool(_DELIVERY_ISSUE.search(joined)) or "tracking" in tokset,
+        "delivery_issue": (bool(_DELIVERY_ISSUE.search(joined)) or "tracking" in tokset
+                           or bool(_NOT_RECEIVED.search(joined))
+                           # "order placed kiya but still koi update nai" (real comment, 25 Nov)
+                           or ("order" in tokset and bool(tokset & {"update", "status", "still", "where"}))),
         "exchange": "exchange" in tokset,
+        "seller_only": bool(_SELLER_ONLY.search(original.lower())),
+        "abroad": bool(_ABROAD.search(original.lower())),
         "policy_word": "policy" in tokset,
     }
     return {
